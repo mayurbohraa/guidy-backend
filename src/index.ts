@@ -6,8 +6,8 @@ import passport from "passport";
 import appRoutes from "./routes";
 import jwtStrategy from "./modules/authentication/jwt.strategy";
 import cors from "cors";
-import { join } from "path";
 import dns from 'dns';
+import { uploadsDir } from "./helpers/uploads.dir";
 
 dotenv.config();
 
@@ -38,7 +38,7 @@ app.use(express.json());
 
 app.use(passport.initialize());
 passport.use("jwt", jwtStrategy);
-app.use("/uploads", express.static(join(__dirname, "../uploads")));
+app.use("/uploads", express.static(uploadsDir));
 app.use("/api/v1", appRoutes);
 
 app.use(exceptionHandler);
