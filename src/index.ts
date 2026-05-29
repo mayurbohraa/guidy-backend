@@ -38,6 +38,9 @@ app.use(express.json());
 
 app.use(passport.initialize());
 passport.use("jwt", jwtStrategy);
+app.get("/", (req, res) => {
+  res.send({ status: "ok", message: "Guidy backend is running" });
+});
 app.use("/uploads", express.static(uploadsDir));
 app.use("/api/v1", appRoutes);
 
