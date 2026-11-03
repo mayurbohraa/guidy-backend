@@ -141,6 +141,14 @@ test("isolated database workflows",{timeout:240000},async(t)=>{
    await request("/profile",{token:student,status:401});
    await request("/login",{body:{email,password:"Replacement@123"}});
   });
+  await t.test("profile password changes verify the old password and revoke previous sessions", async () => {
+   const account = tokens.other;
+   await request("/profile/password", {token: account, method:"PUT", body:{currentPassword:"incorrect",newPassword:"UpdatedPass@123"},status:400});
+   await request("/profile/password", {token: account, method:"PUT", body:{currentPassword:password,newPassword:"UpdatedPass@123"}});
+   await request("/profile", {token:account,status:401});
+   const signedIn = await request("/login", {body:{email:"other@qu.edu.qa",password:"UpdatedPass@123"}});
+   assert.ok(signedIn.data.token);
+  });
   await t.test("soft deletion removes a resource from download access",async()=>{
    await request("/resources/delete/"+resource._id,{token:admin,method:"DELETE"});
    await request("/resources/"+resource._id+"/download",{token:admin,status:404});

@@ -530,6 +530,230 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Workspace updates",
+      "item": [
+        {
+          "name": "Workspace search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/search?q={{search}}"
+          },
+          "response": []
+        },
+        {
+          "name": "My submissions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/resources/mine"
+          },
+          "response": []
+        },
+        {
+          "name": "Withdraw pending submission",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/resources/mine/{{resourceId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Users directory (admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users?role=student&page=1&limit=15"
+          },
+          "response": []
+        },
+        {
+          "name": "Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/profile"
+          },
+          "response": []
+        },
+        {
+          "name": "Change password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/profile/password",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"{{password}}\",\n  \"newPassword\": \"{{newPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reveal recovery code",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/profile/recovery-code"
+          },
+          "response": []
+        },
+        {
+          "name": "Verify recovery code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/verify-recovery-code",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"code\": \"{{recoveryCode}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reset password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/reset-password",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"code\": \"{{recoveryCode}}\",\n  \"password\": \"{{newPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Request recovery",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/forgot-password",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Recovery queue (admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/account-recovery"
+          },
+          "response": []
+        },
+        {
+          "name": "Approve simulated delivery (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/account-recovery/{{requestId}}/approve",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identityVerified\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Retry notifications (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/notifications/retry",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Upload policy",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/settings"
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "auth": {
@@ -560,6 +784,13 @@
           ""
         ]
       }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000/api/v1",
+      "type": "string"
     }
   ]
 }
