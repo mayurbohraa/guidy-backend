@@ -3,10 +3,11 @@ import mongoose, { Document, model, Schema } from "mongoose";
 export interface Notebook extends Document {
   user: mongoose.Types.ObjectId;
   subject: mongoose.Types.ObjectId;
-  notebookTitle: String;
-  notebookContent: String;
+  notebookTitle: string;
+  notebookContent: string;
   year: string;
   term: string;
+
 }
 
 const notebookSchema: Schema = new Schema<Notebook>({

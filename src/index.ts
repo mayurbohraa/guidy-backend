@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import dns from "node:dns";
 import express from "express";
 import dotenv from "dotenv";
 import exceptionHandler from "./helpers/exceptionHandler";
@@ -6,24 +7,10 @@ import passport from "passport";
 import appRoutes from "./routes";
 import jwtStrategy from "./modules/authentication/jwt.strategy";
 import cors from "cors";
-import dns from 'dns';
-import { uploadsDir } from "./helpers/uploads.dir";
 
 dotenv.config();
 
 const app = express();
-
-dns.setServers(['8.8.8.8', '1.1.1.1']); // Use Google's and Cloudflare's DNS servers
-dns.setDefaultResultOrder('ipv4first');  // Force IPv4 resolution 
-
-mongoose.set('strictQuery', true);
-mongoose.connect(process.env.DB_URL!,{
-            serverSelectionTimeoutMS: 5000,  // Set a timeout for server selection
-            family: 4, // force IPv4 address resolution
-        });
-mongoose.connection.on("connected", () => {
-  console.log("Database connected");
-});
 
 app.use(express.json());
 app.use(
@@ -34,20 +21,30 @@ app.use(
 );
 
 const port = process.env.PORT || 4000;
-app.use(express.json());
-
 app.use(passport.initialize());
 passport.use("jwt", jwtStrategy);
 app.get("/", (req, res) => {
   res.send({ status: "ok", message: "Guidy backend is running" });
 });
-app.use("/uploads", express.static(uploadsDir));
 app.use("/api/v1", appRoutes);
 
 app.use(exceptionHandler);
 
-app.listen(port, printServer);
+mongoose.set("strictQuery", true);
+const databaseUrl = process.env.DB_URL;
+if (!databaseUrl) throw new Error("Set DB_URL to a MongoDB connection string");
 
-function printServer() {
-  console.log(`server is running on port ${port}`);
-}
+// Use the original DNS resolvers for Atlas SRV lookups and prefer IPv4.
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
+dns.setDefaultResultOrder("ipv4first");
+
+// Wait for MongoDB before opening the port so the health response reflects API readiness.
+mongoose.connect(databaseUrl, {
+  serverSelectionTimeoutMS: 5000,
+  family: 4,
+}).then(() => {
+  app.listen(port, () => console.log(`Guidy API listening on port ${port}`));
+}).catch(() => {
+  console.error("Guidy could not connect to MongoDB");
+  process.exitCode = 1;
+});

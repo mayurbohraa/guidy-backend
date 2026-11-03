@@ -5,6 +5,7 @@ export interface Event {
   eventDate: Date;
   eventType: string;
   userId: Types.ObjectId;
+
 }
 
 const eventSchema: Schema = new Schema<Event>({
@@ -24,20 +25,3 @@ const eventSchema: Schema = new Schema<Event>({
 });
 
 export default model<Event>("event", eventSchema);
-
-// const EventsSchema = new mongoose.Schema({
-//   event_Name: {
-//     type: String,
-//     required: true,
-//   },
-//   event_Type: {
-//     type: String,
-//     required: true,
-//   },
-//   event_Date: {
-//     type: Date,
-//     required: true,
-//   },
-// });
-
-// export const events = mongoose.model("events", EventsSchema);

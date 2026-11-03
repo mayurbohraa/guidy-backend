@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+
 import eventModel, { Event } from "./events.model";
 
 export async function createEvent(createEventDto: any): Promise<Event> {
@@ -19,7 +20,7 @@ export async function getEvents(
 ): Promise<Array<Event>> {
   return await eventModel
     .find({
-      userId:userId
+      userId: userId
     })
     .limit(limit)
     .skip(limit * (page - 1));
@@ -27,15 +28,23 @@ export async function getEvents(
 
 export async function updateEventById(
   id: Types.ObjectId,
+  userId: Types.ObjectId,
   updateEventDto: any
 ): Promise<Event | null> {
-  return await eventModel.findByIdAndUpdate(id, updateEventDto);
+  return await eventModel.findOneAndUpdate({ _id: id, userId }, {
+    $set: {
+      eventName: updateEventDto.eventName,
+      eventType: updateEventDto.eventType,
+      eventDate: updateEventDto.eventDate,
+    }
+  }, { runValidators: true, new: true });
 }
 
 export async function deleteEvent(
-  id: Types.ObjectId
+  id: Types.ObjectId,
+  userId: Types.ObjectId
 ): Promise<Event | null> {
-  return await eventModel.findByIdAndDelete(id);
+  return await eventModel.findOneAndDelete({ _id: id, userId });
 }
 
 export async function deleteAllEvents(userId: Types.ObjectId) {

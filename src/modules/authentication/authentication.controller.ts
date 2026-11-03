@@ -1,17 +1,27 @@
 import { Request, Response } from "express";
-import { User } from "./user.model";
+
+import { Role, User } from "./user.model";
 import * as authenticationService from "./authentication.service";
 import httpStatus from "http-status";
 
+// Select response fields explicitly so password hashes never enter browser storage.
+function publicUser(user: User) {
+  const { _id, firstName, lastName, email, mobileNumber, role } = user;
+  return { _id, firstName, lastName, email, mobileNumber, role };
+}
+
 export async function login(req: Request, res: Response) {
   const { email, password } = req.body;
+  if (typeof email !== "string" || typeof password !== "string") {
+    return res.status(400).json({ status: 400, message: "Email and password are required" });
+  }
   const user: User | null = await authenticationService.findUserByEmail(email);
   if (user) {
-    if (authenticationService.comparePassword(password, user.password)) {
+    if (await authenticationService.comparePassword(password, user.password)) {
       return res.status(httpStatus.OK).send({
         data: {
-          user,
-          token: authenticationService.generateToken(user.toObject()),
+          user: publicUser(user),
+          token: authenticationService.generateToken(user),
         },
         message: "User loggedin successfully",
         status: httpStatus.OK,
@@ -32,7 +42,14 @@ export async function login(req: Request, res: Response) {
 
 export async function signup(req: Request, res: Response) {
   const { firstName, lastName, email, mobileNumber, password, role } = req.body;
-  console.log(req.body);
+  if (role !== Role.Student && role !== Role.Contributor) {
+    return res.status(400).json({ status: 400, message: "Select a valid signup role" });
+  }
+  if ([firstName, lastName, email, mobileNumber, password].some(
+    (value) => typeof value !== "string" || !value.trim()
+  ) || Buffer.byteLength(password, "utf8") > 72) {
+    return res.status(400).json({ status: 400, message: "Invalid signup details" });
+  }
   if (authenticationService.verifyMail(email)) {
     return res.status(httpStatus.BAD_REQUEST).send({
       status: httpStatus.BAD_REQUEST,
@@ -52,14 +69,14 @@ export async function signup(req: Request, res: Response) {
       lastName: lastName,
       email: email,
       mobileNumber: mobileNumber,
-      password: authenticationService.hashPassword(password),
+      password: await authenticationService.hashPassword(password),
       role: role,
     });
 
     return res.status(httpStatus.OK).send({
       data: {
-        user,
-        token: authenticationService.generateToken(user.toObject()),
+        user: publicUser(user),
+        token: authenticationService.generateToken(user),
       },
       message: "User created successfully",
       status: httpStatus.OK,
@@ -73,9 +90,41 @@ export async function signup(req: Request, res: Response) {
 }
 
 export async function forgetPassword(req: Request, res: Response) {
-  const {} = req.body;
+  const { } = req.body;
 }
 
 export async function resetPassword(req: Request, res: Response) {
-  const {} = req.body;
+  const { } = req.body;
+}
+
+export async function getProfile(_req: Request, res: Response) {
+  return res.json({ status: 200, data: publicUser(res.locals.user) });
+}
+
+export async function updateProfile(req: Request, res: Response) {
+  const { firstName, lastName, email, mobileNumber = "" } = req.body ?? {};
+  const fields: Record<string, string> = {};
+  if (typeof firstName !== "string" || !firstName.trim() || firstName.trim().length > 60) {
+    fields.firstName = "Enter a first name of up to 60 characters";
+  }
+  if (typeof lastName !== "string" || !lastName.trim() || lastName.trim().length > 60) {
+    fields.lastName = "Enter a last name of up to 60 characters";
+  }
+  if (typeof email !== "string" || email.trim().length > 254 ||
+    authenticationService.verifyMail(email.trim())) {
+    fields.email = "Enter a valid Qatar University email address";
+  }
+  if (typeof mobileNumber !== "string" ||
+    (mobileNumber.trim() && authenticationService.verifyNumber(mobileNumber.trim()))) {
+    fields.mobileNumber = "Enter a valid phone number including the country code";
+  }
+  if (Object.keys(fields).length) {
+    return res.status(400).json({ status: 400, message: "Check your profile details", fields });
+  }
+  const user = await authenticationService.updateUserProfile(res.locals.userId, {
+    firstName: firstName.trim(), lastName: lastName.trim(), email: email.trim(),
+    mobileNumber: mobileNumber.trim(),
+  });
+  if (!user) return res.status(404).json({ status: 404, message: "Account not found" });
+  return res.json({ status: 200, data: publicUser(user), message: "Profile updated" });
 }

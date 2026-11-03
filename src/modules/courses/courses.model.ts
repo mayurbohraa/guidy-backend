@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface Course extends Document {
   name: string;
@@ -9,6 +9,7 @@ export interface Course extends Document {
   term: string;
   course_info: string;
   instructorName: string;
+
 }
 
 const courseSchema: Schema = new mongoose.Schema<Course>({
@@ -29,7 +30,7 @@ const courseSchema: Schema = new mongoose.Schema<Course>({
   },
   term: {
     type: String,
-    // enum: ["spring", "fall"],
+
   },
   course_info: {
     type: String,

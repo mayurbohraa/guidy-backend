@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+
 import userModel, { User } from "./user.model";
 import bcrypt from "bcrypt";
 import jsonwebtoken from "jsonwebtoken";
@@ -14,17 +15,16 @@ export async function findUserByEmail(email: string): Promise<User | null> {
   });
 }
 
-export function hashPassword(password: string): string {
-  const salt = bcrypt.genSaltSync();
-  return bcrypt.hashSync(password, salt);
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 10);
 }
 
 export function generateToken(user: User): string {
-  return jsonwebtoken.sign(user, process.env.secret_key!);
+  return jsonwebtoken.sign({ _id: user._id }, process.env.secret_key!, { expiresIn: "8h" });
 }
 
-export function comparePassword(password: string, hash: string): boolean {
-  return bcrypt.compareSync(password, hash);
+export async function comparePassword(password: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(password, hash);
 }
 
 export async function createUser(createUserDto: any): Promise<User> {
@@ -32,9 +32,7 @@ export async function createUser(createUserDto: any): Promise<User> {
 }
 
 export function verifyMail(email: string): boolean {
-  const validDomains = ["qu.edu.qa"];
-  const emailDomain = email.split("@").pop() ?? "";
-  return emailDomain in validDomains;
+  return !/^[^\s@]+@qu\.edu\.qa$/i.test(email);
 }
 export function verifyNumber(mobileNumber: string): any {
   let numberInfo = phone(mobileNumber);
@@ -43,4 +41,17 @@ export function verifyNumber(mobileNumber: string): any {
 
 export async function getAdmin() {
   return await userModel.findOne({ role: "admin" });
+}
+
+export async function updateUserProfile(
+  userId: Types.ObjectId,
+  profile: Pick<User, "firstName" | "lastName" | "email" | "mobileNumber">
+): Promise<User | null> {
+  // Copy contact fields explicitly so this endpoint cannot change credentials or permissions.
+  return userModel.findByIdAndUpdate(userId, { $set: {
+    firstName: profile.firstName,
+    lastName: profile.lastName,
+    email: profile.email,
+    mobileNumber: profile.mobileNumber,
+  } }, { new: true, runValidators: true });
 }

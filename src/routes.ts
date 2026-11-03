@@ -1,4 +1,7 @@
 import { Router } from "express";
+
+import asyncHandler from "./helpers/async.handler";
+import { getProfile, updateProfile } from "./modules/authentication/authentication.controller";
 import verifyMiddleware from "./helpers/verify.middleware";
 import courseRoutes from "./modules/courses/courses.routes";
 import authenticationRoutes from "./modules/authentication/authentication.routes";
@@ -16,6 +19,8 @@ const router = Router();
 
 router.use("/", authenticationRoutes);
 router.use(verifyMiddleware);
+router.get("/profile", asyncHandler(getProfile));
+router.put("/profile", asyncHandler(updateProfile));
 router.use("/course", courseRoutes);
 router.use("/role", roleRoutes);
 router.use("/settings", settingsRoutes);

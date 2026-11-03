@@ -1,41 +1,14 @@
 import { Request, Response, NextFunction } from "express";
-import httpStatus from "http-status";
-import passport from "passport";
 
-export default async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const user: any = await new Promise((resolve, reject) => {
-      passport.authenticate(
-        "jwt",
-        (
-          err: any,
-          user?: Express.User | false | null,
-          info?: object | string | Array<string | undefined>,
-          status?: number | Array<number | undefined>
-        ) => {
-          if (err) {
-            reject(err);
-          }
-          if (user) {
-            resolve(user);
-          }
-          if (info) {
-            reject(info);
-          }
-          if (status) {
-            reject(status);
-          }
-        }
-      )(req, res, next);
-    });
-    res.set("userId", user._id);
-    res.set("user", JSON.stringify(user));
+import passport from "passport";
+import { User } from "../modules/authentication/user.model";
+
+export default (req: Request, res: Response, next: NextFunction) => {
+  passport.authenticate("jwt", { session: false }, (error: unknown, user: User | false) => {
+    if (error) return next(error);
+    if (!user) return res.status(401).json({ status: 401, message: "Unauthorized" });
+    res.locals.user = user;
+    res.locals.userId = user._id;
     next();
-  } catch (error) {
-    console.log(error);
-    res.status(httpStatus.UNAUTHORIZED).send({
-      status: httpStatus.UNAUTHORIZED,
-      message: "unauthorised",
-    });
-  }
+  })(req, res, next);
 };

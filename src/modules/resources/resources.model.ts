@@ -9,6 +9,7 @@ export interface Resource extends Document {
   resourceName: string;
   isDeleted: boolean;
   user: Types.ObjectId;
+
 }
 
 const resourceSchema = new mongoose.Schema<Resource>({

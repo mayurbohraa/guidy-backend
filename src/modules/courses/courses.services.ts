@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+
 import coursesModel, { Course } from "./courses.model";
 
 export async function getCourseById(
@@ -18,7 +19,7 @@ export async function getCourses(
 ): Promise<Array<Course>> {
   return await coursesModel
     .find({
-      name: { $regex: search, $options: "i" },
+      name: { $regex: search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" },
     })
     .limit(limit)
     .skip(limit * (page - 1));

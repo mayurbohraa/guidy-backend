@@ -10,9 +10,10 @@ export interface User extends Document {
   firstName: string;
   lastName: string;
   email: string;
-  mobileNumber: Number;
+  mobileNumber: string;
   password: string;
   role: string;
+
 }
 
 const userSchema: Schema = new mongoose.Schema<User>({

@@ -1,11 +1,12 @@
 import httpStatus from "http-status";
-import { Request, Response } from "express";
+
+import { Request, Response, NextFunction } from "express";
 import { Types } from "mongoose";
 import * as notificationService from "./notification.service";
 
-export async function getNotifications(req: Request, res: Response) {
+export async function getNotifications(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId: Types.ObjectId = new Types.ObjectId(res.get("userId"));
+    const userId: Types.ObjectId = new Types.ObjectId(res.locals.userId);
     const notifications = await notificationService.getNotificationsByUserId(
       userId
     );
@@ -15,16 +16,13 @@ export async function getNotifications(req: Request, res: Response) {
       message: "Notifications fetched successfully",
     });
   } catch (error) {
-    console.log(error);
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-      data: error,
-    });
+    next(error);
   }
 }
 
-export async function createNotification(req: Request, res: Response) {
+export async function createNotification(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId: Types.ObjectId = new Types.ObjectId(res.get("userId"));
+    const userId: Types.ObjectId = new Types.ObjectId(res.locals.userId);
     const { title, description } = req.body;
     const notification = await notificationService.createNotification({
       user: userId,
@@ -37,30 +35,25 @@ export async function createNotification(req: Request, res: Response) {
       data: notification,
     });
   } catch (error) {
-    console.log(error);
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-      status: httpStatus.INTERNAL_SERVER_ERROR,
-      message: error,
-    });
+    next(error);
   }
 }
 
-export async function updateNotification(req: Request, res: Response) {
+export async function updateNotification(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId: Types.ObjectId = new Types.ObjectId(res.get("userId"));
+    const userId: Types.ObjectId = new Types.ObjectId(res.locals.userId);
     const notificationId: Types.ObjectId = new Types.ObjectId(req.params.id);
     const notification = await notificationService.updateNotificationById(
       notificationId,
+      userId,
       req.body
     );
+    if (!notification) return res.status(404).json({ status: 404, message: "Notification not found" });
     res.status(httpStatus.OK).send({
       data: notification,
       message: "Notifications update successfully",
     });
   } catch (error) {
-    console.log(error);
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-      data: error,
-    });
+    next(error);
   }
 }

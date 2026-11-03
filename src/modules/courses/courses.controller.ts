@@ -1,10 +1,11 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
+
 import httpStatus from "http-status";
 import { Types } from "mongoose";
 import { Course } from "./courses.model";
 import * as courseServices from "./courses.services";
 
-export async function createCourse(req: Request, res: Response) {
+export async function createCourse(req: Request, res: Response, next: NextFunction) {
   const {
     courseName,
     creditHour,
@@ -34,12 +35,12 @@ export async function createCourse(req: Request, res: Response) {
   });
 }
 
-export async function getCourse(req: Request, res: Response) {
+export async function getCourse(req: Request, res: Response, next: NextFunction) {
   const { search, limit, page } = req.query;
   const courses: Array<Course> = await courseServices.getCourses(
-    search as string,
-    parseInt(limit as string),
-    parseInt(page as string)
+    typeof search === "string" ? search : "",
+    Math.min(100, Math.max(1, parseInt(limit as string) || 50)),
+    Math.max(1, parseInt(page as string) || 1)
   );
   res.status(httpStatus.OK).send({
     data: courses,
@@ -48,7 +49,7 @@ export async function getCourse(req: Request, res: Response) {
   });
 }
 
-export async function updateCourse(req: Request, res: Response) {
+export async function updateCourse(req: Request, res: Response, next: NextFunction) {
   const courseId: Types.ObjectId = new Types.ObjectId(req.params.id);
   const updateCourseDto = {
     name: req.body.courseName,
@@ -64,7 +65,7 @@ export async function updateCourse(req: Request, res: Response) {
   });
 }
 
-export async function deleteCourse(req: Request, res: Response) {
+export async function deleteCourse(req: Request, res: Response, next: NextFunction) {
   const courseId: Types.ObjectId = new Types.ObjectId(req.params.id);
   const course: Course | null = await courseServices.deleteCourseById(courseId);
   res.status(httpStatus.OK).send({
@@ -74,7 +75,7 @@ export async function deleteCourse(req: Request, res: Response) {
   });
 }
 
-export async function getSubjects(req: Request, res: Response) {
+export async function getSubjects(req: Request, res: Response, next: NextFunction) {
   try {
     const term = req.params.term;
     const year = parseInt(req.params.year as string);
@@ -88,11 +89,6 @@ export async function getSubjects(req: Request, res: Response) {
       data: subjects,
     });
   } catch (error) {
-    console.log(error);
-    const err: Error = error as Error;
-    res.status(httpStatus.OK).send({
-      data: error,
-      message: err.message,
-    });
+    next(error);
   }
 }

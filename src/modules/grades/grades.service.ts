@@ -1,9 +1,10 @@
 import { Types } from "mongoose";
+
 import gradesModel from "./grades.model";
 import registrationModel from "../registration/registration.model";
 
 export async function createGrade(userId: Types.ObjectId, grades: any) {
-  return await gradesModel.create({ user: userId, ...grades });
+  return await gradesModel.create({ ...grades, user: userId });
 }
 
 export async function getGrades(userId: Types.ObjectId) {
@@ -59,11 +60,9 @@ export async function getGradesByCourseId(
   userId: Types.ObjectId,
   courseId: Types.ObjectId
 ) {
-  console.log({ user: userId, course: courseId });
   const data = await gradesModel
     .findOne({ user: userId, course: courseId })
     .populate({ path: "course" });
-  console.log(data);
   return data;
 }
 
@@ -72,35 +71,6 @@ export async function getProgress(
   year: number,
   sem: string
 ) {
-  // const courses = await registrationModel.aggregate([
-  //   {
-  //     $match: {
-  //       userId: userId,
-  //     },
-  //   },
-  //   {
-  //     $lookup: {
-  //       from: "courses",
-  //       localField: "courseIds",
-  //       foreignField: "_id",
-  //       as: "courses",
-  //     },
-  //   },
-  //   {
-  //     $project: {
-  //       _id: 0,
-  //       courses: 1,
-  //     },
-  //   },
-  // ]);
-  // const coursesId: any[] = [];
-  // if (courses.length) {
-  //   courses[0].courses.forEach((course: any) => {
-  //     if (course.year == year && course.term == sem) {
-  //       coursesId.push(course._id);
-  //     }
-  //   });
-  // }
   const matchObject: any = {
     user: userId,
   };
@@ -111,17 +81,11 @@ export async function getProgress(
     matchObject.term = sem;
   }
   const grades = await gradesModel.find(matchObject);
-  let progress = 0;
-  grades.forEach((grade: any) => {
-    let totalMarks = 0;
-    totalMarks +=
-      totalMarks +
-      grade.quiz1 +
-      grade.quiz2 +
-      grade.midterm +
-      grade.project +
-      grade.final;
-    progress += totalMarks;
-  });
-  return progress / grades.length;
+  // Each assessment is out of 20, so five scores form the course percentage.
+  if (!grades.length) return 0;
+  const total = grades.reduce((sum, grade) => {
+    return sum + (grade.quiz1 ?? 0) + (grade.quiz2 ?? 0) +
+      (grade.midterm ?? 0) + (grade.project ?? 0) + (grade.final ?? 0);
+  }, 0);
+  return total / grades.length;
 }
