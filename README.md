@@ -14,8 +14,8 @@ The Guidy API powers a university academic tracker. It handles authentication, s
 
 ## GitHub repositories
 
-- [Guidy Backend](https://github.com/mayurbohra9/guidy_backend)
-- [Guidy Frontend](https://github.com/mayurbohra9/guidy_frontend)
+- [Guidy Backend](https://github.com/mayurbohraa/guidy_backend)
+- [Guidy Frontend](https://github.com/mayurbohraa/guidy_frontend)
 
 ## Tech stack
 
