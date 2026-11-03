@@ -9,10 +9,27 @@ export interface Resource extends Document {
   resourceName: string;
   isDeleted: boolean;
   user: Types.ObjectId;
+  fileId?: Types.ObjectId;
+  mimeType?: string;
+  fileSize?: number;
+  scanStatus?: string;
+  notificationJobs: any[];
 
 }
 
 const resourceSchema = new mongoose.Schema<Resource>({
+  fileId: mongoose.Schema.Types.ObjectId,
+  mimeType: String,
+  fileSize: Number,
+  scanStatus: { type: String, enum: ["clean", "format-checked"] },
+  notificationJobs: [{
+    kind: { type: String, enum: ["submitted", "accepted", "denied"] },
+    attempts: { type: Number, default: 0 },
+    nextAttemptAt: { type: Date, default: Date.now },
+    lockedUntil: { type: Date, default: () => new Date(0) },
+    lease: { type: String, default: "" },
+    deliveredAt: { type: Date, default: null },
+  }],
   term: {
     type: String,
     trim: true,
@@ -44,5 +61,7 @@ const resourceSchema = new mongoose.Schema<Resource>({
     ref: "user",
   },
 });
+
+resourceSchema.index({ "notificationJobs.nextAttemptAt": 1 });
 
 export default mongoose.model<Resource>("resources", resourceSchema);

@@ -1,3 +1,5 @@
+import { requireRole } from "../../helpers/require.role";
+import { retryNotifications } from "./notification.jobs";
 import { Types } from "mongoose";
 
 import asyncHandler from "../../helpers/async.handler";
@@ -14,6 +16,7 @@ router.param("id", (req, res, next, id) => {
   next();
 });
 
+router.post("/retry", requireRole("admin"), asyncHandler(retryNotifications));
 router.get("/", asyncHandler(notificationController.getNotifications));
 router.post("/", asyncHandler(notificationController.createNotification));
 router.put("/:id", asyncHandler(notificationController.updateNotification));

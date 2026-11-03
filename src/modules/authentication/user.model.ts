@@ -13,6 +13,9 @@ export interface User extends Document {
   mobileNumber: string;
   password: string;
   role: string;
+  sessionVersion?: number;
+  passwordResetHash?: string;
+  passwordResetExpiresAt?: Date;
 
 }
 
@@ -33,6 +36,9 @@ const userSchema: Schema = new mongoose.Schema<User>({
   password: {
     type: String,
   },
+  sessionVersion: { type: Number, default: 0 },
+  passwordResetHash: { type: String, select: false },
+  passwordResetExpiresAt: { type: Date, select: false },
   role: {
     type: String,
     enum: Role,

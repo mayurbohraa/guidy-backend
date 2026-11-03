@@ -8,8 +8,10 @@
     "start": "node dist/index.js",
     "dev": "nodemon src/index.ts",
     "build": "tsc",
-    "test": "npm run build && node --test test/security.test.cjs",
-    "seed:demo": "npm run build && node scripts/seed-demo.cjs"
+    "test": "npm run build && node --test test/security.test.cjs test/features.test.cjs",
+    "seed:demo": "npm run build && node scripts/seed-demo.cjs",
+    "migrate:uploads": "npm run build && node scripts/migrate-uploads.cjs",
+    "test:integration": "npm run build && node --test test/integration.test.cjs"
   },
   "keywords": [],
   "author": "",

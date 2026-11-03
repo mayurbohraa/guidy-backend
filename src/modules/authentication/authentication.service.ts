@@ -20,7 +20,7 @@ export async function hashPassword(password: string): Promise<string> {
 }
 
 export function generateToken(user: User): string {
-  return jsonwebtoken.sign({ _id: user._id }, process.env.secret_key!, { expiresIn: "8h" });
+  return jsonwebtoken.sign({ _id: user._id, sessionVersion: user.sessionVersion ?? 0 }, process.env.secret_key!, { expiresIn: "8h" });
 }
 
 export async function comparePassword(password: string, hash: string): Promise<boolean> {

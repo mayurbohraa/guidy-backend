@@ -92,3 +92,9 @@ export async function getSubjects(req: Request, res: Response, next: NextFunctio
     next(error);
   }
 }
+
+export async function getCourseDetails(req: Request, res: Response) {
+  const course = await courseServices.getCourseById(new Types.ObjectId(req.params.id));
+  if (!course) return res.status(404).json({ message: "Course not found" });
+  return res.json({ data: course });
+}

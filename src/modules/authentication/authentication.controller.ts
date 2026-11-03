@@ -1,3 +1,4 @@
+import userModel from "./user.model";
 import { Request, Response } from "express";
 
 import { Role, User } from "./user.model";
@@ -89,14 +90,6 @@ export async function signup(req: Request, res: Response) {
   }
 }
 
-export async function forgetPassword(req: Request, res: Response) {
-  const { } = req.body;
-}
-
-export async function resetPassword(req: Request, res: Response) {
-  const { } = req.body;
-}
-
 export async function getProfile(_req: Request, res: Response) {
   return res.json({ status: 200, data: publicUser(res.locals.user) });
 }
@@ -127,4 +120,28 @@ export async function updateProfile(req: Request, res: Response) {
   });
   if (!user) return res.status(404).json({ status: 404, message: "Account not found" });
   return res.json({ status: 200, data: publicUser(user), message: "Profile updated" });
+}
+
+export async function changePassword(req: Request, res: Response) {
+  const { currentPassword, newPassword } = req.body ?? {};
+  if (typeof currentPassword !== "string" || !currentPassword || Buffer.byteLength(currentPassword) > 72 ||
+      typeof newPassword !== "string" || Buffer.byteLength(newPassword) > 72 ||
+      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,20}$/.test(newPassword)) {
+    return res.status(400).json({ message: "Enter your current password and a valid new password." });
+  }
+  const user = res.locals.user as User;
+  if (!await authenticationService.comparePassword(currentPassword, user.password)) {
+    return res.status(400).json({ message: "Your current password is incorrect." });
+  }
+  if (await authenticationService.comparePassword(newPassword, user.password)) {
+    return res.status(400).json({ message: "Choose a different password." });
+  }
+  // Match the verified hash so concurrent password changes cannot overwrite each other.
+  const updated = await userModel.updateOne({ _id: user._id, password: user.password }, {
+    $set: { password: await authenticationService.hashPassword(newPassword) },
+    $inc: { sessionVersion: 1 },
+    $unset: { passwordResetHash: 1, passwordResetExpiresAt: 1 },
+  });
+  if (!updated.modifiedCount) return res.status(409).json({ message: "Your password changed. Sign in and try again." });
+  return res.json({ message: "Password updated. Sign in with your new password." });
 }

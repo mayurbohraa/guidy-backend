@@ -1,3 +1,5 @@
+import registrationModel from "../registration/registration.model";
+import coursesModel from "../courses/courses.model";
 import { Request, Response, NextFunction } from "express";
 
 import httpStatus from "http-status";
@@ -7,19 +9,24 @@ import * as gradesService from "./grades.service";
 export async function createGrades(req: Request, res: Response, next: NextFunction) {
   try {
     const userId: Types.ObjectId = new Types.ObjectId(res.locals.userId);
-    const { course, year, term, quiz1, quiz2, midterm, project, final } = req.body;
+    if (res.locals.user.role !== "student") return res.status(403).json({ message: "Grade tracking is available to students" });
+    const { course, quiz1, quiz2, midterm, project, final } = req.body ?? {};
     const scores = [quiz1, quiz2, midterm, project, final];
     if (!Types.ObjectId.isValid(course) || scores.some(
       (score) => typeof score !== "number" || !Number.isFinite(score) || score < 0 || score > 20
     )) {
       return res.status(400).json({ status: 400, message: "Enter valid course grades between 0 and 20" });
     }
+    const registered = await registrationModel.exists({ userId, courseIds: course });
+    const courseRecord = await coursesModel.findById(course);
+    if (!registered || !courseRecord) return res.status(400).json({ message: "Choose one of your registered courses" });
+    const { year, term } = courseRecord;
     const grades = await gradesService.createGrade(userId, {
       course, year, term, quiz1, quiz2, midterm, project, final,
     });
     res.status(httpStatus.OK).send({
       status: httpStatus.OK,
-      message: "Grade created sucesfully",
+      message: "Grades saved",
       data: grades,
     });
   } catch (error) {

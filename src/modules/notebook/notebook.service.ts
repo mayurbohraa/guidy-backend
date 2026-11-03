@@ -12,14 +12,20 @@ export async function createNote(
 export async function getNotes(
   userId: Types.ObjectId,
   page: number,
-  limit: number
+  limit: number,
+  focus?: string
 ): Promise<Array<Notebook>> {
-  return await notebookModel
+  const records = await notebookModel
     .find({ user: userId })
     .populate("user", "-password")
     .populate("subject")
     .limit(limit)
     .skip((page - 1) * limit);
+  if (focus && Types.ObjectId.isValid(focus) && !records.some(record => String(record._id) === focus)) {
+    const target = await notebookModel.findOne({ _id: focus, user: userId }).populate("subject");
+    if (target) records.push(target);
+  }
+  return records;
 }
 
 export async function deleteNote(

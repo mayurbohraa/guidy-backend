@@ -34,7 +34,8 @@ export async function getEvents(req: Request, res: Response) {
     userId,
     typeof search === "string" ? search : "",
     Math.max(1, parseInt(page as string) || 1),
-    Math.min(100, Math.max(1, parseInt(limit as string) || 50))
+    Math.min(100, Math.max(1, parseInt(limit as string) || 50)),
+    typeof req.query.focus === "string" ? req.query.focus : undefined
   );
   res.status(httpStatus.OK).send({
     data: events,

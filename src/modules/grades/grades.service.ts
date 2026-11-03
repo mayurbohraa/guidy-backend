@@ -1,10 +1,20 @@
+import { createHash } from "crypto";
 import { Types } from "mongoose";
 
 import gradesModel from "./grades.model";
 import registrationModel from "../registration/registration.model";
 
 export async function createGrade(userId: Types.ObjectId, grades: any) {
-  return await gradesModel.create({ ...grades, user: userId });
+  const existing = await gradesModel.findOne({ user: userId, course: grades.course }).select("_id");
+  // Deterministic IDs prevent concurrent first saves from creating duplicate course records.
+  const id = existing?._id ?? new Types.ObjectId(createHash("sha256").update(String(userId) + ":" + String(grades.course)).digest("hex").slice(0, 24));
+  const { course, year, term, quiz1, quiz2, midterm, project, final } = grades;
+  const update = { course, year, term, quiz1, quiz2, midterm, project, final, user: userId };
+  try { return await gradesModel.findOneAndUpdate({ _id: id, user: userId }, { $set: update }, { upsert: true, new: true, runValidators: true }); }
+  catch (error) {
+    if ((error as any).code !== 11000) throw error;
+    return gradesModel.findOneAndUpdate({ _id: id, user: userId }, { $set: update }, { new: true, runValidators: true });
+  }
 }
 
 export async function getGrades(userId: Types.ObjectId) {

@@ -23,6 +23,7 @@ routes.param("id", (req, res, next, id) => {
 routes.get("/get-courses", asyncHandler(courseController.getCourse));
 routes.get("/getSubjects/:term/:year", asyncHandler(courseController.getSubjects));
 routes.post("/create-course", adminOnly, asyncHandler(courseController.createCourse));
+routes.get("/:id", asyncHandler(courseController.getCourseDetails));
 routes.put("/:id", adminOnly, asyncHandler(courseController.updateCourse));
 
 export default routes;

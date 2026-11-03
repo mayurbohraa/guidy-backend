@@ -16,14 +16,20 @@ export async function getEvents(
   userId: Types.ObjectId,
   search: string,
   page: number,
-  limit: number
+  limit: number,
+  focus?: string
 ): Promise<Array<Event>> {
-  return await eventModel
+  const records = await eventModel
     .find({
       userId: userId
     })
     .limit(limit)
     .skip(limit * (page - 1));
+  if (focus && Types.ObjectId.isValid(focus) && !records.some(record => String(record._id) === focus)) {
+    const target = await eventModel.findOne({ _id: focus, userId: userId });
+    if (target) records.push(target);
+  }
+  return records;
 }
 
 export async function updateEventById(

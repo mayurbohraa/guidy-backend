@@ -1,35 +1,9 @@
+import "dotenv/config";
 import mongoose from "mongoose";
 import dns from "node:dns";
-import express from "express";
-import dotenv from "dotenv";
-import exceptionHandler from "./helpers/exceptionHandler";
-import passport from "passport";
-import appRoutes from "./routes";
-import jwtStrategy from "./modules/authentication/jwt.strategy";
-import cors from "cors";
-
-dotenv.config();
-
-const app = express();
-
-app.use(express.json());
-app.use(
-  cors({
-    origin: "*",
-    methods: ["GET", "POST", "DELETE", "UPDATE", "PUT", "PATCH"],
-  })
-);
+import app from "./app";
 
 const port = process.env.PORT || 4000;
-app.use(passport.initialize());
-passport.use("jwt", jwtStrategy);
-app.get("/", (req, res) => {
-  res.send({ status: "ok", message: "Guidy backend is running" });
-});
-app.use("/api/v1", appRoutes);
-
-app.use(exceptionHandler);
-
 mongoose.set("strictQuery", true);
 const databaseUrl = process.env.DB_URL;
 if (!databaseUrl) throw new Error("Set DB_URL to a MongoDB connection string");

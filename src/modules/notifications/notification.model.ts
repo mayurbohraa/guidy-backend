@@ -6,6 +6,7 @@ export enum NotificationType {
 
 const notificationSchema: Schema = new Schema(
   {
+    deliveryKey: { type: String, unique: true, sparse: true },
     title: {
       type: String,
     },

@@ -61,8 +61,9 @@ test("empty and partial grade records yield a finite course average", async (t) 
 test("grade creation cannot assign the record to another account", async (t) => {
   const owner = new Types.ObjectId();
   const other = new Types.ObjectId();
-  t.mock.method(gradeModel, "create", async (record) => record);
-  const record = await grades.createGrade(owner, { user: other, quiz1: 10 });
+  t.mock.method(gradeModel, "findOne", () => ({ select: async () => null }));
+  t.mock.method(gradeModel, "findOneAndUpdate", async (_filter, update) => update.$set);
+  const record = await grades.createGrade(owner, { user: other, course: new Types.ObjectId(), quiz1: 10 });
   assert.equal(record.user, owner);
 });
 

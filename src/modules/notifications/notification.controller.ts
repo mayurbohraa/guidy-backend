@@ -1,3 +1,4 @@
+import { deliverResourceNotifications } from "./notification.jobs";
 import httpStatus from "http-status";
 
 import { Request, Response, NextFunction } from "express";
@@ -7,6 +8,7 @@ import * as notificationService from "./notification.service";
 export async function getNotifications(req: Request, res: Response, next: NextFunction) {
   try {
     const userId: Types.ObjectId = new Types.ObjectId(res.locals.userId);
+    await deliverResourceNotifications().catch(() => console.error("Notification jobs remain queued"));
     const notifications = await notificationService.getNotificationsByUserId(
       userId
     );
@@ -43,6 +45,7 @@ export async function updateNotification(req: Request, res: Response, next: Next
   try {
     const userId: Types.ObjectId = new Types.ObjectId(res.locals.userId);
     const notificationId: Types.ObjectId = new Types.ObjectId(req.params.id);
+    if (typeof req.body.isRead !== "boolean") return res.status(400).json({ message: "Choose a valid read status" });
     const notification = await notificationService.updateNotificationById(
       notificationId,
       userId,

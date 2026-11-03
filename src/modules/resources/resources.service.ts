@@ -22,7 +22,7 @@ export async function updateResource(
   // A pending-only write makes repeated approval requests harmless.
   return await resourcesModel.findOneAndUpdate(
     { _id: resourceId, status: "pending", isDeleted: false },
-    { $set: { status: updateResourceDto.status } },
+    { $set: { status: updateResourceDto.status }, $push: { notificationJobs: { kind: updateResourceDto.status } } },
     { new: true, runValidators: true }
   );
 }

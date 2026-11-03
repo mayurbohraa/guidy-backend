@@ -19,7 +19,7 @@ export default new Strategy(getOptions(), async function(jwt_payload, done) {
   try {
     // Load the current account so deleted accounts and role changes take effect before token expiry.
     const user: User | null = await UserModel.findById(jwt_payload._id);
-    if (user) {
+    if (user && (jwt_payload.sessionVersion ?? 0) === (user.sessionVersion ?? 0)) {
       return done(null, user);
     } else {
       return done(null, false);
