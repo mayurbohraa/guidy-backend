@@ -123,7 +123,7 @@ test("isolated database workflows",{timeout:240000},async(t)=>{
    await request("/profile/recovery-code", {status:401});
    const reveal = await request("/profile/recovery-code", {token:student});
    const code = reveal.data.code;
-   assert.match(code, /^[A-F0-9]{8}(?:-[A-F0-9]{8}){3}$/);
+   assert.match(code, /^[A-F0-9]{4}(?:-[A-F0-9]{4}){3}$/);
    await request("/account-recovery",{token:student,status:403});
    const recovery = (await request("/account-recovery",{token:admin})).data[0];
    const approval = await request("/account-recovery/"+recovery._id+"/approve",{token:admin,body:{identityVerified:true}});

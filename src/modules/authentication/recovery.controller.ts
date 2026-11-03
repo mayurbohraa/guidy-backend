@@ -41,10 +41,10 @@ export async function listRecovery(_req: Request, res: Response) {
 }
 
 // Derive a code without storing its plaintext. A new password hash invalidates it.
-function recoveryCode(user: User) {
+function recoveryCode(user: User, length = 16) {
   return createHmac("sha256", process.env.secret_key!)
     .update(JSON.stringify(["guidy-recovery-v1", String(user._id), user.password]))
-    .digest("hex").slice(0, 32).toUpperCase().match(/.{8}/g)!.join("-");
+    .digest("hex").slice(0, length).toUpperCase().match(/.{4}/g)!.join("-");
 }
 
 export async function revealRecoveryCode(_req: Request, res: Response) {
@@ -77,10 +77,10 @@ export async function issueRecovery(req: Request, res: Response) {
 async function validatedRecoveryUser(req: Request, email: unknown, code: unknown) {
   const address = typeof email === "string" ? email.trim() : "";
   const normalizedCode = typeof code === "string" ? code.trim().replace(/-/g, "").toUpperCase() : "";
-  if (!address || address.length > 254 || verifyMail(address) || !/^[0-9A-F]{32}$/.test(normalizedCode)) return null;
+  if (!address || address.length > 254 || verifyMail(address) || !/^(?:[0-9A-F]{16}|[0-9A-F]{32})$/.test(normalizedCode)) return null;
   await rateLimit(req, "reset:" + address.toLowerCase());
   const user = await userModel.findOne({ email: address });
-  const expected = user ? recoveryCode(user).replace(/-/g, "") : "0".repeat(32);
+  const expected = user ? recoveryCode(user, normalizedCode.length).replace(/-/g, "") : "0".repeat(normalizedCode.length);
   return timingSafeEqual(Buffer.from(normalizedCode), Buffer.from(expected)) ? user : null;
 }
 
