@@ -107,7 +107,7 @@ All paths below are relative to `/api/v1`. Protected requests use `Authorization
 
 New registrations require four to six courses from the same year and term. Administrators are provisioned separately. Import `Guidy.postman_collection.json` for request examples and configure its variables with your own endpoint and account values.
 
-Contributors use `GET /resources/mine` to see their own submissions and review statuses.
+Contributors use `GET /resources/mine` to see their own submissions and review statuses. They can download their own files and withdraw a pending submission via `DELETE /resources/mine/:id`.
 
 ## Demo data
 

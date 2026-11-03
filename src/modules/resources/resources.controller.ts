@@ -58,7 +58,10 @@ export async function getAdminResources(_req: Request, res: Response) {
 
 export async function downloadResource(req: Request, res: Response, _next?: NextFunction) {
   if (!Types.ObjectId.isValid(req.params.id)) return res.status(404).json({ message: "Resource not found" });
-  const filter = res.locals.user.role === "admin" ? {} : { status: "accepted" };
+  const role = res.locals.user.role;
+  const filter = role === "admin" ? {} : role === "contributor"
+    ? { $or: [{ status: "accepted" }, { user: res.locals.userId }] }
+    : { status: "accepted" };
   const resource = await resourcesModel.findOne({ _id: req.params.id, isDeleted: false, ...filter });
   if (!resource) return res.status(404).json({ message: "Resource not found" });
   if (resource.fileId) {
@@ -91,4 +94,13 @@ export async function getMyResources(_req: Request, res: Response) {
     .sort({ _id: -1 })
     .lean();
   return res.json({ data });
+}
+
+export async function withdrawMyResource(req: Request, res: Response) {
+  const resource = await resourcesModel.findOneAndUpdate(
+    { _id: req.params.id, user: res.locals.userId, status: "pending", isDeleted: false },
+    { $set: { isDeleted: true } },
+  );
+  if (!resource) return res.status(404).json({ message: "Pending submission not found." });
+  return res.json({ message: "Submission withdrawn." });
 }

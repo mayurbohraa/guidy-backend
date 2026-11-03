@@ -80,6 +80,11 @@ test("isolated database workflows",{timeout:240000},async(t)=>{
    await request("/resources/mine", {token:student,status:403});
    const ownResources = (await request("/resources/mine", {token:contributor})).data;
    assert.ok(ownResources.some(item => item._id === resource._id && item.status === "pending"));
+   assert.equal(await request("/resources/"+resource._id+"/download", {token:contributor}), "Integration study notes");
+   const withdrawn = (await request("/resources", {token:contributor,method:"PUT",body:uploadBody("withdraw.txt")})).data;
+   await request("/resources/mine/"+withdrawn._id, {token:student,method:"DELETE",status:403});
+   await request("/resources/mine/"+withdrawn._id, {token:contributor,method:"DELETE"});
+   await request("/resources/"+withdrawn._id+"/download", {token:contributor,status:404});
    assert.ok(ownResources.every(item => item.fileId === undefined && item.notificationJobs === undefined));
    assert.equal(await mongoose.connection.db.collection("resourceFiles.files").countDocuments({_id:new mongoose.Types.ObjectId(resource.fileId)}),1);
    await request("/resources/"+resource._id+"/download",{token:student,status:404});
