@@ -83,3 +83,12 @@ export async function downloadResource(req: Request, res: Response, _next?: Next
     if (error && !res.headersSent) res.status(404).json({ message: "File unavailable" });
   });
 }
+
+export async function getMyResources(_req: Request, res: Response) {
+  const data = await resourcesModel.find({ user: res.locals.userId, isDeleted: false })
+    .select("resourceName subject year term status")
+    .populate("subject", "name")
+    .sort({ _id: -1 })
+    .lean();
+  return res.json({ data });
+}

@@ -107,6 +107,8 @@ All paths below are relative to `/api/v1`. Protected requests use `Authorization
 
 New registrations require four to six courses from the same year and term. Administrators are provisioned separately. Import `Guidy.postman_collection.json` for request examples and configure its variables with your own endpoint and account values.
 
+Contributors use `GET /resources/mine` to see their own submissions and review statuses.
+
 ## Demo data
 
 Run `npm run seed:demo` only with `DB_URL` pointing to the intended showcase database. The three existing Guidy demo accounts must already exist; the script does not create accounts or change passwords.

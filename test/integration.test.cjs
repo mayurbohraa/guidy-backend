@@ -77,6 +77,10 @@ test("isolated database workflows",{timeout:240000},async(t)=>{
   await t.test("uploads persist in GridFS and downloads enforce approval",async()=>{
    resource=(await request("/resources",{token:contributor,method:"PUT",body:uploadBody()})).data;
    assert.ok(resource.fileId);
+   await request("/resources/mine", {token:student,status:403});
+   const ownResources = (await request("/resources/mine", {token:contributor})).data;
+   assert.ok(ownResources.some(item => item._id === resource._id && item.status === "pending"));
+   assert.ok(ownResources.every(item => item.fileId === undefined && item.notificationJobs === undefined));
    assert.equal(await mongoose.connection.db.collection("resourceFiles.files").countDocuments({_id:new mongoose.Types.ObjectId(resource.fileId)}),1);
    await request("/resources/"+resource._id+"/download",{token:student,status:404});
    assert.equal(await request("/resources/"+resource._id+"/download",{token:admin}),"Integration study notes");

@@ -27,6 +27,7 @@ router.param("id", (req, res, next, id) => {
 });
 
 router.get("/", asyncHandler(resourcesController.getResources));
+router.get("/mine", allowRoles("contributor"), asyncHandler(resourcesController.getMyResources));
 router.get("/:id/download", asyncHandler(resourcesController.downloadResource));
 router.get("/adminResources", adminOnly, asyncHandler(resourcesController.getAdminResources));
 router.put("/", allowRoles("contributor", "admin"), upload.single("file"), asyncHandler(resourcesController.createResources));
