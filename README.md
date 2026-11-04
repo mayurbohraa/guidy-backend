@@ -19,8 +19,8 @@ Recovery uses a password-bound code that can be revealed only by the signed-in o
 
 ## Repositories
 
-- [Backend repository](https://github.com/mayurbohraa/guidy_backend)
-- [Companion frontend repository and application setup](https://github.com/mayurbohraa/guidy_frontend)
+- [Backend repository](https://github.com/mayurbohraa/guidy-backend)
+- [Companion frontend repository and application setup](https://github.com/mayurbohraa/guidy-frontend)
 
 ## Tech stack
 
@@ -37,8 +37,8 @@ Node.js, TypeScript 4.9, Express 4, MongoDB, Mongoose 6, Passport JWT, jsonwebto
 1. Clone and open the backend repository:
 
    ```sh
-   git clone https://github.com/mayurbohraa/guidy_backend.git
-   cd guidy_backend
+   git clone https://github.com/mayurbohraa/guidy-backend.git
+   cd guidy-backend
    ```
 
 2. Install dependencies:
