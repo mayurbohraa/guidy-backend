@@ -109,10 +109,3 @@ test/                 # Regression and isolated database checks
 documents/            # Public application preview
 .env.example          # Configuration template
 ```
-
-## My Contributions
-
-- Planned the backend architecture and API requirements.
-- Defined how the backend APIs connect with the frontend.
-- Coordinated the implementation plan across the application.
-- Deployed the backend on Vercel.
