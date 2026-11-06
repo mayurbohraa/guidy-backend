@@ -1,14 +1,14 @@
 # Guidy Backend
 
-## Project Overview
+## Overview
 
 The Guidy API manages accounts, course planning, personal study records, and moderated learning resources. Express routes apply authentication, role checks, and ownership rules before accessing MongoDB records and GridFS files.
 
 ## Project Preview
 
-<img src="documents/project-preview.webp" alt="Guidy Backend application screens and visual identity" width="520">
+<img src="documents/project-preview.webp" alt="Guidy Backend application screens and visual identity" width="100%">
 
-Companion application screens and visual identity. Branding mockups are presentation concepts.
+Companion application preview.
 
 ## Key Features
 
@@ -24,7 +24,7 @@ Frontend repository: https://github.com/mayurbohraa/guidy-frontend
 
 API deployment: https://guidy-backend.vercel.app/
 
-The API deployment returned HTTP 500 during the availability check on 4 November 2026.
+The API deployment returned HTTP 500 during the availability check on 6 November 2026.
 
 ## Tech Stack
 
